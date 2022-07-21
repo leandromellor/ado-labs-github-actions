@@ -6,7 +6,7 @@
 locals {
   resource_group_name = "${var.naming_prefix}-${random_integer.name_suffix.result}"
   cluster_name = "${var.naming_prefix}-${random_integer.name_suffix.result}"
-  acr_name = "${var.naming_prefix}-acrname"
+  acr_name = "${var.naming_prefix}${random_integer.name_suffix.result}"
   service_principal_name = "${var.naming_prefix}-${random_integer.name_suffix.result}"
 }
 
