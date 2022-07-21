@@ -12,20 +12,32 @@ variable "naming_prefix" {
   default = "adolabs"
 }
 
-variable "asp_tier" {
-    type = string
-    description = "Tier for App Service Plan (Standard, PremiumV2)"
-    default = "Free"
+variable "resource_group_name" {
+  type        = string
+  description = "RG name in Azure"
+  default = "adolabs_aks_rg"
 }
 
-variable "asp_size" {
-    type = string
-    description = "Size for App Service Plan (S2, P1v2)"
-    default = "S1"
+variable "cluster_name" {
+  type        = string
+  description = "AKS name in Azure"
+  default = "adolabs-cluster"
 }
 
-variable "capacity" {
-  type = string
-  description = "Number of instances for App Service Plan"
-  default = "1"
+variable "kubernetes_version" {
+  type        = string
+  description = "Kubernetes version"
+  default = "1.24"
+}
+
+variable "system_node_count" {
+  type        = number
+  description = "Number of AKS worker nodes"
+  default = "2"
+}
+
+variable "acr_name" {
+  type        = string
+  description = "ACR name"
+  default = "adolabsacr"
 }
