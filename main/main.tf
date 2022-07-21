@@ -26,28 +26,53 @@ data "azurerm_subscription" "current" {}
 
 data "azuread_client_config" "current" {}
 
-resource "azurerm_resource_group" "aks" {
-  name     = local.resource_group_name
-  location = var.location
+data "azuread_application_published_app_ids" "current" {}
+
+resource "azuread_service_principal" "role_acrpull" {
+  application_id = data.azuread_application_published_app_ids.current.result.MicrosoftGraph
+  use_existing   = true
+  owners = [ data.azuread_client_config.current.object_id ]
 }
 
 resource "azuread_application" "role_acrpull" {
   display_name = local.service_principal_name
   owners = [ data.azuread_client_config.current.object_id ]
+
+  required_resource_access {
+    resource_app_id = data.azuread_application_published_app_ids.current.result.MicrosoftGraph
+
+    resource_access {
+      id   = azuread_service_principal.role_acrpull.app_role_ids["User.Read.All"]
+      type = "Role"
+    }
+
+    resource_access {
+      id   = azuread_service_principal.role_acrpull.oauth2_permission_scope_ids["User.ReadWrite"]
+      type = "Scope"
+    }
+  }
 }
 
-resource "azuread_service_principal" "role_acrpull" {
-  application_id = azuread_application.role_acrpull.application_id
-  owners = [ data.azuread_client_config.current.object_id ]
+resource "azuread_service_principal" "principal" {
+  application_id = azuread_application.principal.application_id
+}
+
+resource "azurerm_role_assignment" "role_acrpull" {
+  app_role_id         = azuread_service_principal.role_acrpull.app_role_ids["User.Read.All"]
+  principal_object_id = azuread_service_principal.principal.object_id
+  resource_object_id  = azuread_service_principal.role_acrpull.object_id
+  scope                = data.azurerm_subscription.current.id
+  role_definition_name = "Contributor"
+  principal_id         = azuread_service_principal.role_acrpull.id
+}
+
+resource "azurerm_resource_group" "aks" {
+  name     = local.resource_group_name
+  location = var.location
 }
 
 resource "azuread_service_principal_password" "role_acrpull" {
   service_principal_id = azuread_service_principal.role_acrpull.object_id
-}
-resource "azurerm_role_assignment" "role_acrpull" {
-  scope                = data.azurerm_subscription.current.id
-  role_definition_name = "Contributor"
-  principal_id         = azuread_service_principal.role_acrpull.id
 }
 
 resource "azurerm_container_registry" "acr" {
