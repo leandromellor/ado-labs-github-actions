@@ -87,7 +87,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
 resource "github_actions_secret" "actions_secret_for_aks" {
   for_each = {
-    RESOURCE_GROUP      = azurerm_resource_group.aks.resource_group_name
+    RESOURCE_GROUP      = azurerm_resource_group.aks.name
     ARM_CLIENT_ID       = azuread_service_principal.role_acrpull.application_id
     ARM_CLIENT_SECRET   = azuread_service_principal_password.role_acrpull.value
     ARM_SUBSCRIPTION_ID = data.azurerm_subscription.current.subscription_id
