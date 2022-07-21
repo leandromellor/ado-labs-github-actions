@@ -42,7 +42,7 @@ resource "azuread_service_principal" "role_acrpull" {
 
 resource "azurerm_role_assignment" "role_acrpull" {
   scope                = data.azurerm_subscription.current.id
-  role_definition_name = "Owner"
+  role_definition_name = "Admin"
   principal_id         = azuread_service_principal.role_acrpull.id
 }
 
