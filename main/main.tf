@@ -40,9 +40,12 @@ resource "azuread_service_principal" "role_acrpull" {
   owners = [ data.azuread_client_config.current.object_id ]
 }
 
+resource "azuread_service_principal_password" "role_acrpull" {
+  service_principal_id = azuread_service_principal.role_acrpull.object_id
+}
 resource "azurerm_role_assignment" "role_acrpull" {
   scope                = data.azurerm_subscription.current.id
-  role_definition_name = "Admin"
+  role_definition_name = "Contributor"
   principal_id         = azuread_service_principal.role_acrpull.id
 }
 
@@ -78,4 +81,20 @@ resource "azurerm_kubernetes_cluster" "aks" {
     load_balancer_sku = "Standard"
     network_plugin    = "kubenet" 
   }
+}
+
+## GitHub secrets
+
+resource "github_actions_secret" "actions_secret_for_aks" {
+  for_each = {
+    RESOURCE_GROUP      = azurerm_storage_account.aks.resource_group_name
+    ARM_CLIENT_ID       = azuread_service_principal.role_acrpull.application_id
+    ARM_CLIENT_SECRET   = azuread_service_principal_password.role_acrpull.value
+    ARM_SUBSCRIPTION_ID = data.azurerm_subscription.current.subscription_id
+    ARM_TENANT_ID       = data.azuread_client_config.current.tenant_id
+  }
+
+  repository      = var.github_repository
+  secret_name     = each.key
+  plaintext_value = each.value
 }
