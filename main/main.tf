@@ -7,8 +7,7 @@ locals {
   resource_group_name = "${var.naming_prefix}-${random_integer.name_suffix.result}"
   cluster_name = "${var.naming_prefix}-${random_integer.name_suffix.result}"
   acr_name = "${var.naming_prefix}-${random_integer.name_suffix.result}"
-  storage_account_name   = "${lower(var.naming_prefix)}${random_integer.sa_num.result}"
-  service_principal_name = "${var.naming_prefix}-${random_integer.sa_num.result}"
+  service_principal_name = "${var.naming_prefix}-${random_integer.name_suffix.result}"
 }
 
 resource "random_integer" "name_suffix" {
@@ -27,6 +26,11 @@ data "azuread_client_config" "current" {}
 resource "azurerm_resource_group" "aks" {
   name     = local.resource_group_name
   location = var.location
+}
+
+resource "azuread_application" "role_acrpull" {
+  display_name = local.service_principal_name
+  owners = [ data.azuread_client_config.current.object_id ]
 }
 
 resource "azuread_service_principal" "role_acrpull" {
