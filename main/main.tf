@@ -53,13 +53,13 @@ resource "azuread_application" "role_acrpull" {
   }
 }
 
-resource "azuread_service_principal" "principal" {
-  application_id = azuread_application.principal.application_id
+resource "azuread_service_principal" "role_acrpull" {
+  application_id = azuread_application.role_acrpull.application_id
 }
 
 resource "azurerm_role_assignment" "role_acrpull" {
   app_id         = azuread_service_principal.role_acrpull.app_role_ids["User.Read.All"]
-  principal_id = azuread_service_principal.principal.id
+  principal_id = azuread_service_principal.role_acrpull.id
   resource_id  = azuread_service_principal.role_acrpull.id
   scope                = data.azurerm_subscription.current.id
   role_definition_name = "Contributor"
