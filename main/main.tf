@@ -83,11 +83,28 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 }
 
+resource "azurerm_storage_account" "saaks" {
+  name                     = local.storage_account_name
+  resource_group_name      = azurerm_resource_group.setup.name
+  location                 = var.location
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+
+}
+
+resource "azurerm_storage_container" "ctaks" {
+  name                 = "terraform-state"
+  storage_account_name = azurerm_storage_account.saaks.name
+
+}
+
 ## GitHub secrets
 
 resource "github_actions_secret" "actions_secret_for_aks" {
   for_each = {
+    STORAGE_ACCOUNT     = azurerm_storage_account.saaks.name
     RESOURCE_GROUP      = azurerm_resource_group.aks.name
+    CONTAINER_NAME      = azurerm_storage_container.ctaks.name
     ARM_CLIENT_ID       = azuread_service_principal.role_acrpull.application_id
     ARM_CLIENT_SECRET   = azuread_service_principal_password.role_acrpull.value
     ARM_SUBSCRIPTION_ID = data.azurerm_subscription.current.subscription_id
