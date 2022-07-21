@@ -8,6 +8,7 @@ locals {
   cluster_name = "${var.naming_prefix}-${random_integer.name_suffix.result}"
   acr_name = "${var.naming_prefix}${random_integer.name_suffix.result}"
   service_principal_name = "${var.naming_prefix}-${random_integer.name_suffix.result}"
+  storage_account_name   = "${lower(var.naming_prefix)}${random_integer.sa_numaks.result}"
 }
 
 resource "random_integer" "name_suffix" {
@@ -83,9 +84,23 @@ resource "azurerm_kubernetes_cluster" "aks" {
   }
 }
 
+##################################################################################
+# SA
+##################################################################################
+
+resource "random_integer" "sa_numaks" {
+  min = 10000
+  max = 99999
+}
+
+resource "azurerm_resource_group" "setupaks" {
+  name     = local.resource_group_name
+  location = var.location
+}
+
 resource "azurerm_storage_account" "saaks" {
   name                     = local.storage_account_name
-  resource_group_name      = azurerm_resource_group.setup.name
+  resource_group_name      = azurerm_resource_group.setupaks.name
   location                 = var.location
   account_tier             = "Standard"
   account_replication_type = "LRS"
