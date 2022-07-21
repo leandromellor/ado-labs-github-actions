@@ -41,3 +41,8 @@ variable "acr_name" {
   description = "ACR name"
   default = "adolabsacr"
 }
+
+variable "github_repository" {
+  type    = string
+  default = "ado-labs-github-actions"
+}
