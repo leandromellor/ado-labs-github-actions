@@ -6,7 +6,7 @@
 locals {
   resource_group_name = "${var.naming_prefix}-${random_integer.name_suffix.result}"
   cluster_name = "${var.naming_prefix}-${random_integer.name_suffix.result}"
-  acr_name = "${var.naming_prefix}-${random_integer.name_suffix.result}"
+  acr_name = "${var.naming_prefix}-acrname"
   service_principal_name = "${var.naming_prefix}-${random_integer.name_suffix.result}"
 }
 
@@ -14,6 +14,8 @@ resource "random_integer" "name_suffix" {
   min = 10000
   max = 99999
 }
+
+
 
 ##################################################################################
 # AKS
@@ -40,7 +42,7 @@ resource "azuread_service_principal" "role_acrpull" {
 
 resource "azurerm_role_assignment" "role_acrpull" {
   scope                = data.azurerm_subscription.current.id
-  role_definition_name = "Contributor"
+  role_definition_name = "Owner"
   principal_id         = azuread_service_principal.role_acrpull.id
 }
 
