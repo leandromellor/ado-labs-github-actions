@@ -37,6 +37,7 @@ resource "azuread_service_principal" "role_acrpull" {
 resource "azuread_application" "role_acrpull" {
   display_name = local.service_principal_name
   owners = [ data.azuread_client_config.current.object_id ]
+  application_id = azuread_application.role_acrpull.application_id
 
   required_resource_access {
     resource_app_id = data.azuread_application_published_app_ids.current.result.MicrosoftGraph
@@ -51,10 +52,6 @@ resource "azuread_application" "role_acrpull" {
       type = "Scope"
     }
   }
-}
-
-resource "azuread_service_principal" "role_acrpull" {
-  application_id = azuread_application.role_acrpull.application_id
 }
 
 resource "azurerm_role_assignment" "role_acrpull" {
